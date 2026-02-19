@@ -1,9 +1,13 @@
+import 'package:daily_grind/database/habit_database.dart';
 import 'package:daily_grind/pages/home_page.dart';
 import 'package:daily_grind/providers/theme_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await HabitDatabase.init();
+  await HabitDatabase.saveFirstLaunchDate();
   runApp(const ProviderScope(child: MyApp()));
 }
 
