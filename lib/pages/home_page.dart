@@ -1,10 +1,26 @@
+import 'package:daily_grind/providers/theme_provider.dart';
+import 'package:daily_grind/theme/theme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(), drawer: Drawer());
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Scaffold(
+      appBar: AppBar(),
+      drawer: Drawer(
+        child: Center(
+          child: CupertinoSwitch(
+            value: ref.watch(themeProvider) == darkMode,
+            onChanged: (value) {
+              ref.read(themeProvider.notifier).toggleTheme();
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
