@@ -1,5 +1,7 @@
 import 'package:daily_grind/components/habit_tile.dart';
+import 'package:daily_grind/components/heat_map.dart';
 import 'package:daily_grind/components/my_drawer.dart';
+import 'package:daily_grind/database/habit_database.dart';
 import 'package:daily_grind/models/habit.dart';
 import 'package:daily_grind/providers/habit_provider.dart';
 import 'package:daily_grind/util/habit_util.dart';
@@ -131,6 +133,8 @@ Widget _buildHabitList(WidgetRef ref) {
     error: (err, stack) => Center(child: Text('Error: $err')),
     data: (habits) => ListView.builder(
       itemCount: habits.length,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         final habit = habits[index];
         final isCompleted = isHabitCompletedToday(habit.completedDays);
@@ -141,6 +145,27 @@ Widget _buildHabitList(WidgetRef ref) {
           onEditPressed: (context) => editHabitBox(habit, context, ref),
           onDeletePressed: (context) => deleteHabitBox(habit, context, ref),
         );
+      },
+    ),
+  );
+}
+
+Widget _buildHeatMap(WidgetRef ref) {
+  final asyncHabits = ref.watch(habitProvider);
+
+  return asyncHabits.when(
+    loading: () => const SizedBox.shrink(),
+    error: (_, _) => const SizedBox.shrink(),
+    data: (habits) => FutureBuilder<DateTime?>(
+      future: HabitDatabase.getFirstLaunchDate(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData && snapshot.data != null) {
+          return MyHeatMap(
+            datasets: getHabitDatasets(habits),
+            startDate: snapshot.data!,
+          );
+        }
+        return const SizedBox.shrink();
       },
     ),
   );
@@ -162,7 +187,7 @@ class HomePage extends ConsumerWidget {
         shape: const CircleBorder(),
         child: Icon(Icons.add, color: Colors.black),
       ),
-      body: _buildHabitList(ref),
+      body: ListView(children: [_buildHeatMap(ref), _buildHabitList(ref)]),
     );
   }
 }
